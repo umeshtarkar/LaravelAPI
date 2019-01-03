@@ -15,6 +15,15 @@ class Controller extends BaseController
     
     protected $statusCode;
 
+    protected $page_number;
+
+    protected $record_offset;
+
+    protected $records_per_page;
+
+    protected $is_pagination_params = false;
+        
+
     public function getErrorMessage($validation)
     {
         $error_messages=array();
@@ -24,5 +33,26 @@ class Controller extends BaseController
         }
 
         return implode(" ",$error_messages);  
+    }
+
+
+    public function paginationParametersCheck($request)
+    {
+        try 
+        {
+            $records_per_page 	= $request->get('records_per_page');
+            $page_number 		= $request->get('page_number');
+
+            if ($records_per_page && $page_number) {
+
+                    $this->page_number = $page_number;
+                    $this->records_per_page = $records_per_page;
+
+                    $this->record_offset = ($page_number - 1) * $records_per_page;
+                    $this->is_pagination_params = true;
+            }
+        } catch (Exception $e) {
+                return $e->getMessage();
+        }
     }
 }
