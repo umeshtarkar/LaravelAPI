@@ -29,12 +29,15 @@ class NewsCategoryController extends Controller
             }
 
             $categories = NewsCategory::where('status',1)->skip($this->record_offset)->take($this->records_per_page)->select('id','name','picture','created_at')->get();
-            // print_r($category);exit;
             if(!$categories->isEmpty()){
                 
                 $this->apiResponse['statusCode'] = 200;
                 $this->apiResponse['status']     = 'success';
                 $this->apiResponse['data']       = $categories;
+            }else{
+                $this->apiResponse['statusCode'] = 200;
+                $this->apiResponse['status']     = 'success';
+                $this->apiResponse['status']     = 'No data found';
             }
         }catch(Exception $e){
             $this->apiResponse['message'] = $e->getMessage();   

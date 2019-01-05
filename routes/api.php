@@ -32,8 +32,8 @@ Route::prefix('v1/session')->namespace('Api')->group(function(){
     Route::get('category','NewsCategoryController@getCategory');
     Route::get('category/{id}','NewsCategoryController@getCategoryDetail');
     Route::post('category/create','NewsCategoryController@createCategory');
-    Route::post('category/update','NewsCategory@updateCategory');
-    Route::post('category/status','NewsCategory@toggleCategoryStatus');
+    Route::post('category/update','NewsCategoryController@updateCategory');
+    Route::post('category/status','NewsCategoryController@toggleCategoryStatus');
     
     Route::post('admin/create','ApiController@createAdmin');
     Route::post('admin/update','ApiController@updateAdmin');
