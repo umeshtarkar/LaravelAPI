@@ -66,7 +66,7 @@ class NewsController extends Controller
             
             $validator = Validator::make($request, [
                 'title'              => 'required|regex:/^([^0-9]*)$/|max:255',
-                'youtube_video_url'  => 'required|regex:/^([^0-9]*)$/|unique:news,youtube_video_url',
+                'youtube_video_url'  => 'unique:news,youtube_video_url',
                 'news_category_id'   => 'required',
                 'user_id'            =>  'required',
             ]);
@@ -102,7 +102,7 @@ class NewsController extends Controller
                 if($news){
                     $validator = Validator::make($request, [
                         'title'              => 'required|regex:/^([^0-9]*)$/|max:255',
-                        'youtube_video_url'  => 'required|regex:/^([^0-9]*)$/|unique:news,youtube_video_url,'.$id,
+                        'youtube_video_url'  => 'unique:news,youtube_video_url,'.$id,
                         'news_category_id'   => 'required',
                         'user_id'            =>  'required',
                     ]);
