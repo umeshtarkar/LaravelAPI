@@ -31,7 +31,7 @@ class ApiController extends Controller
 
                 throw new Exception($this->getErrorMessage($validator));
             } else {
-                $request['password'] = bcrypt($request['password']);
+                $data['password'] = bcrypt($request['password']);
 
                 $admin = new Admin;
 

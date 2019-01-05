@@ -85,7 +85,7 @@ class NewsController extends Controller
             }
         }catch(Exception $e){
 
-            return $this->apiResponse['message'] = $e->getMessage();
+            $this->apiResponse['message'] = $e->getMessage();
         }
         return $this->apiResponse;
     }
