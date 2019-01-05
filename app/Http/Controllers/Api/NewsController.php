@@ -27,7 +27,7 @@ class NewsController extends Controller
                 throw new Exception("Pagination parameters are missing.", 1);
             }
 
-            $news = News::where('status',1)->skip($this->record_offset)->take($this->records_per_page)->select('id','title','picture_small','created_at')->get();
+            $news = News::where('status',1)->skip($this->record_offset)->take($this->records_per_page)->select('id','title','picture_small','created_at','status')->get();
             // print_r($category);exit;
             if(!$news->isEmpty()){
                 
