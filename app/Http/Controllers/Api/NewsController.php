@@ -34,7 +34,12 @@ class NewsController extends Controller
                 $this->apiResponse['statusCode'] = 200;
                 $this->apiResponse['status']     = 'success';
                 $this->apiResponse['data']       = $news;
-            }
+            }else{
+                $this->apiResponse['statusCode'] = 204;
+                $this->apiResponse['status']     = 'success';
+                $this->apiResponse['data']       = array();
+	}
+		
         }catch(Exception $e){
             $this->apiResponse['message'] = $e->getMessage();   
         }
