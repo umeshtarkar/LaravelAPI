@@ -35,6 +35,8 @@ Route::prefix('v1/session')->namespace('Api')->group(function(){
     Route::post('category/update','NewsCategoryController@updateCategory');
     Route::post('category/status','NewsCategoryController@toggleCategoryStatus');
     
+    Route::post('admin/login','ApiController@signin');
+    Route::post('admin/logout','ApiController@signout');
     Route::post('admin/create','ApiController@createAdmin');
     Route::post('admin/update','ApiController@updateAdmin');
     Route::post('admin/status','ApiController@toggleAdminStatus');

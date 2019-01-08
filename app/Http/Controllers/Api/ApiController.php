@@ -8,14 +8,107 @@ use Validator;
 use App\Models\Admin;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Support\Facades\Auth;
 
 class ApiController extends Controller
 {
+    use AuthenticatesUsers;
     public function __construct()
     {
-        $this->middleware('guest');
+        $this->middleware('guest')->except('logout');
         $this->apiResponse['data'] = new \stdClass();
     }
+
+    public function guard()
+    {
+     return Auth::guard('admin');
+   }
+
+   public function signin(Request $request){
+    try{
+        
+        $validator = Validator::make( $parameters, [
+            'email' => 'required|email',
+            'password' => 'required|min:6|max:25',
+        ] );
+
+        if ( $validator->fails() ) {
+            throw new Exception($this->getErrorMessage($validator));
+        }
+
+        if($this->guard()->attempt($request->all())){
+
+            $token = $this->_generateUserToken();
+            $admin = Admin::where('email',$request->email)->first();
+            $admin->auth_token = $token;
+
+            if($admin->save()){
+                $this->apiResponse['statusCode'] = 200;
+                $this->apiResponse['status']     = 'success';
+                $this->apiResponse['message']    = 'Logged in sucessfully!';
+                $this->apiResponse['data']       = $admin;
+            }
+        }else{
+            $this->apiResponse['statusCode']     = 401;
+            $this->apiResponse['message']        = 'Invalid Credentials';
+        }
+        
+    }catch(Exception $e){
+        $this->apiResponse['message'] = $e->getMessage();
+    }
+
+
+
+        if($this->guard()->attempt($request->all())){
+
+            $token = $this->_generateUserToken();
+            $admin = Admin::where('email',$request->email)->first();
+            $admin->auth_token = $token;
+
+            if($admin->save()){
+                $this->apiResponse['statusCode'] = 200;
+                $this->apiResponse['status']     = 'success';
+                $this->apiResponse['message']    = 'Logged in sucessfully!';
+                $this->apiResponse['data']       = $admin;
+            }
+        }else{
+            $this->apiResponse['statusCode']     = 401;
+            $this->apiResponse['message']        = 'Invalid Credentials';
+        }
+    return $this->apiResponse;
+   }
+
+
+   public function signOut( Request $request ) 
+    {
+    	$parameters = $request->all();
+
+    	try 
+    	{
+    		$user = new Admin;
+			$user = $user->where( 'auth_token', $parameters['token'] );
+
+			if (!$user) {
+				$this->apiResponse['message'] = 'Token refreshed or user have another login.';
+			} else {
+				$user = $user->update([ 'auth_token' => '' ]);
+
+				if ( $user === 0 ) {
+					$this->apiResponse['message'] = 'Missing or mismatched auth token.';
+				} else {
+                    $this->apiResponse['status'] = 'success';
+                    $this->apiResponse['message'] = 'Logout Successfully.';
+				}
+			}
+
+    	} catch ( \Exception $e ) {
+    		$this->apiResponse['message'] = $e->getMessage();
+    	}
+
+        return $this->apiResponse;
+    }
+
 
     public function createAdmin(Request $request){
         try
@@ -100,6 +193,12 @@ class ApiController extends Controller
             $this->apiResponse['message'] = $e->getMessage();   
         }
         return $this->apiResponse;
+    }
+
+    // Generates An Unique Id..
+    private function _generateUserToken() 
+    {
+    	return md5( uniqid() );
     }
 
 }
