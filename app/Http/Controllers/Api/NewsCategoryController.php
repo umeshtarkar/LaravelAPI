@@ -45,6 +45,42 @@ class NewsCategoryController extends Controller
         return $this->apiResponse;
     }
 
+    public function getCategoryNews( Request $request,$id){
+        
+        try{
+            if(!$id){
+                throw new Exception("Invalid Request.", 1);
+            }
+
+            $this->paginationParametersCheck($request);
+            
+            if(!$this->is_pagination_params){
+                throw new Exception("Pagination parameters are missing.", 1);
+            }
+
+            $offset  = $this->record_offset;
+            $page_no = $this->records_per_page;
+
+            $categories = NewsCategory::with(['news' => function($query) use ($offset,$page_no){
+                $query->where('status',1)->orderBy('id','DESC')->skip($offset)->take($page_no);
+            }])->where(['status' => 1,'id' => $id])->select('id','name','picture','created_at')->get();
+
+            if(!$categories->isEmpty()){
+                
+                $this->apiResponse['statusCode'] = 200;
+                $this->apiResponse['status']     = 'success';
+                $this->apiResponse['data']       = $categories;
+            }else{
+                $this->apiResponse['statusCode'] = 200;
+                $this->apiResponse['status']     = 'success';
+                $this->apiResponse['status']     = 'No data found';
+            }
+        }catch(Exception $e){
+            $this->apiResponse['message'] = $e->getMessage();   
+        }
+        return $this->apiResponse;
+    }
+
     public function getCategoryDetail($id){
         try{
             

@@ -2,70 +2,15 @@
 
 namespace App\Http\Controllers\Api;
 
-use DB;
-use Exception;
 use Validator;
-use App\Models\News;
+use Exception;
+use App\Models\CPDArticle;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
-class NewsController extends Controller
+class CPDArticleController extends Controller
 {
-
-    public function __construct()
-    {
-        $this->middleware('guest');
-        $this->apiResponse['data'] = new \stdClass();
-    }
-    
-    public function getNews(Request $request){
-        
-        try{
-            $this->paginationParametersCheck($request);
-            
-            if(!$this->is_pagination_params){
-                throw new Exception("Pagination parameters are missing.", 1);
-            }
-
-            $news = News::orderBy('id','DESC')->skip($this->record_offset)->take($this->records_per_page)->select('id','title','picture_small','created_at')->get();
-            // print_r($category);exit;
-            if(!$news->isEmpty()){
-                
-                $this->apiResponse['statusCode'] = 200;
-                $this->apiResponse['status']     = 'success';
-                $this->apiResponse['data']       = $news;
-            }else{
-                $this->apiResponse['statusCode'] = 204;
-                $this->apiResponse['status']     = 'success';
-                $this->apiResponse['data']       = array();
-	}
-		
-        }catch(Exception $e){
-            $this->apiResponse['message'] = $e->getMessage();   
-        }
-        return $this->apiResponse;
-    }
-
-    public function getNewsDetail($id){
-        try{
-            
-            if(!$id){
-                throw new Exception("Invalid Request");
-            }
-            $news = News::find($id);
-            
-            if($news){
-                $this->apiResponse['statusCode'] = 200;
-                $this->apiResponse['status']     = 'success';
-                $this->apiResponse['data']       = $news;
-            }
-        }catch(Exception $e){
-            $this->apiResponse = $e->getMessage();
-        }
-        return $this->apiResponse;
-    }
-
-    public function createNews(Request $request){
+    public function createCPDArticle(Request $request){
         try{
             $request = $request->all();
             
@@ -81,12 +26,12 @@ class NewsController extends Controller
                 throw new Exception($this->getErrorMessage($validator));
             } else {
 
-                $news = new News;
+                $article = new CPDArticle;
 
                 $this->apiResponse['statusCode'] = 201;
                 $this->apiResponse['status']     = 'success';
-                $this->apiResponse['message']    = 'News created sucessfully!';
-                $this->apiResponse['data']       = $news->create($request);
+                $this->apiResponse['message']    = 'CPDArticle created sucessfully!';
+                $this->apiResponse['data']       = $article->create($request);
             }
         }catch(Exception $e){
 
@@ -95,16 +40,16 @@ class NewsController extends Controller
         return $this->apiResponse;
     }
 
-    public function updateNews(Request $request){
+    public function updateCPDArticle(Request $request){
         try{
             if($request->has('id') && !empty($request->id)){
                 
                 $id = $request->id;
                 $request = $request->except('id');
                 
-                $news = News::find($id);
+                $article = CPDArticle::find($id);
                 
-                if($news){
+                if($article){
                     $validator = Validator::make($request, [
                         'title'              => 'required|regex:/^([^0-9]*)$/|max:255',
                         'youtube_video_url'  => 'unique:news,youtube_video_url,'.$id,
@@ -116,12 +61,12 @@ class NewsController extends Controller
                         throw new Exception($this->getErrorMessage($validator));
                     } 
                     
-                    $news->fill($request);
+                    $article->fill($request);
                     
-                    if($news->push()){
+                    if($article->push()){
                         $this->apiResponse['statusCode'] = 200;
                         $this->apiResponse['status']     = 'success';
-                        $this->apiResponse['message']    = 'News updated successfully';
+                        $this->apiResponse['message']    = 'CPDArticle updated successfully';
                     }
                 } else {
                     throw new Exception("Invalid Request");
@@ -136,19 +81,19 @@ class NewsController extends Controller
         return $this->apiResponse;
     }
 
-    public function toggleNewsStatus(Request $request){
+    public function toggleCPDArticle(Request $request){
         try
         {
             $id = $request->get('id');
             $status = $request->get('status');
-            $user = News::find($id);
-            if($user){
-                $user->status = $status;
-                $user->save();
+            $article = CPDArticle::find($id);
+            if($article){
+                $article->status = $status;
+                $article->save();
 
                 $this->apiResponse['statusCode'] = 200;
                 $this->apiResponse['status']     = 'success';
-                $this->apiResponse['message']    = ($status == 1) ? 'News is enabled successfully' : 'News is disabled successfully';
+                $this->apiResponse['message']    = ($status == 1) ? 'CPDArticle is enabled successfully' : 'CPDArticle is disabled successfully';
             }else{
                 throw new Exception('Invalid Request');
             }
