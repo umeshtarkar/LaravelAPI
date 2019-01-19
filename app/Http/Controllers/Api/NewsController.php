@@ -27,8 +27,8 @@ class NewsController extends Controller
                 throw new Exception("Pagination parameters are missing.", 1);
             }
 
-            $news = News::orderBy('id','DESC')->skip($this->record_offset)->take($this->records_per_page)->select('id','title','picture_small','created_at')->get();
-            // print_r($category);exit;
+            $news = News::orderBy('id','DESC')->skip($this->record_offset)->take($this->records_per_page)->get();
+            
             if(!$news->isEmpty()){
                 
                 $this->apiResponse['statusCode'] = 200;
@@ -42,6 +42,22 @@ class NewsController extends Controller
 		
         }catch(Exception $e){
             $this->apiResponse['message'] = $e->getMessage();   
+        }
+        return $this->apiResponse;
+    }
+
+    public function getNewsCount(){
+        
+        try{
+            $newsCount = News::where('status',1)->count();
+            
+            if($newsCount){
+                $this->apiResponse['statusCode'] = 200;
+                $this->apiResponse['status']     = 'success';
+                $this->apiResponse['data']       = $newsCount;
+            }
+        }catch(Exception $e){
+            $this->apiResponse = $e->getMessage();
         }
         return $this->apiResponse;
     }

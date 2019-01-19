@@ -10,6 +10,77 @@ use App\Http\Controllers\Controller;
 
 class CPDArticleController extends Controller
 {
+    
+    public function getCPDArticles(Request $request){
+        
+        try{
+            $this->paginationParametersCheck($request);
+            
+            if(!$this->is_pagination_params){
+                throw new Exception("Pagination parameters are missing.", 1);
+            }
+
+            $articles = CPDArticle::orderBy('id','DESC')->skip($this->record_offset)->take($this->records_per_page);
+            
+            if($request->has('keyword')){
+                $articles->orWhere('title','like',''. $request->keyword.'%')
+                      ->orWhere('subtitle', 'like',''. $request->keyword.'%');
+            }
+
+            $articleList = $articles->get();
+            
+            if(!$articleList->isEmpty()){
+                
+                $this->apiResponse['statusCode'] = 200;
+                $this->apiResponse['status']     = 'success';
+                $this->apiResponse['data']       = $articleList;
+            }else{
+                $this->apiResponse['statusCode'] = 204;
+                $this->apiResponse['status']     = 'success';
+                $this->apiResponse['data']       = array();
+	}
+		
+        }catch(Exception $e){
+            $this->apiResponse['message'] = $e->getMessage();   
+        }
+        return $this->apiResponse;
+    }
+
+    public function getCPDArticlesCount(){
+        
+        try{
+            $articlesCount = CPDArticle::count();
+            
+            if($articlesCount){
+                $this->apiResponse['statusCode'] = 200;
+                $this->apiResponse['status']     = 'success';
+                $this->apiResponse['data']       = $articlesCount;
+            }
+        }catch(Exception $e){
+            $this->apiResponse = $e->getMessage();
+        }
+        return $this->apiResponse;
+    }
+    
+    public function getCPDArticleDetail($id){
+        try{
+            
+            if(!$id){
+                throw new Exception("Invalid Request");
+            }
+            $article = CPDArticle::find($id);
+            
+            if($article){
+                $this->apiResponse['statusCode'] = 200;
+                $this->apiResponse['status']     = 'success';
+                $this->apiResponse['data']       = $article;
+            }
+        }catch(Exception $e){
+            $this->apiResponse = $e->getMessage();
+        }
+        return $this->apiResponse;
+    }
+
     public function createCPDArticle(Request $request){
         try{
             $request = $request->all();

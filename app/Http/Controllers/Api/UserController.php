@@ -18,6 +18,78 @@ class UserController extends Controller
     }
 
 
+    public function getUsers(Request $request){
+        
+        try{
+            $this->paginationParametersCheck($request);
+            
+            if(!$this->is_pagination_params){
+                throw new Exception("Pagination parameters are missing.", 1);
+            }
+
+            $user = User::orderBy('id','DESC')->skip($this->record_offset)->take($this->records_per_page);
+            
+            if($request->has('keyword') && !empty($request->keyword)){
+                $user->orWhere('name','like',''. $request->keyword.'%')
+                      ->orWhere('surname', 'like',''. $request->keyword.'%')
+                      ->orWhere('email', 'like',''. $request->keyword.'%')
+                      ->orWhere('mobile_no', 'like',''. $request->keyword.'%')
+                      ->orWhere('council_reg_no', 'like',''. $request->keyword.'%');
+            }
+            $usersList = $user->get();
+            
+            if(!$usersList->isEmpty()){
+                
+                $this->apiResponse['statusCode'] = 200;
+                $this->apiResponse['status']     = 'success';
+                $this->apiResponse['data']       = $usersList;
+            }else{
+                $this->apiResponse['statusCode'] = 204;
+                $this->apiResponse['status']     = 'success';
+                $this->apiResponse['data']       = array();
+	}
+		
+        }catch(Exception $e){
+            $this->apiResponse['message'] = $e->getMessage();   
+        }
+        return $this->apiResponse;
+    }
+
+    public function getUsersCount(){
+        
+        try{
+            $userCount = User::where('status',1)->count();
+            
+            if($userCount){
+                $this->apiResponse['statusCode'] = 200;
+                $this->apiResponse['status']     = 'success';
+                $this->apiResponse['data']       = $userCount;
+            }
+        }catch(Exception $e){
+            $this->apiResponse = $e->getMessage();
+        }
+        return $this->apiResponse;
+    }
+
+    public function getUserDetail($id){
+        try{
+            
+            if(!$id){
+                throw new Exception("Invalid Request");
+            }
+            $user = User::find($id);
+            
+            if($user){
+                $this->apiResponse['statusCode'] = 200;
+                $this->apiResponse['status']     = 'success';
+                $this->apiResponse['data']       = $user;
+            }
+        }catch(Exception $e){
+            $this->apiResponse = $e->getMessage();
+        }
+        return $this->apiResponse;
+    }
+
     public function create(Request $request)
     {
         try
@@ -52,6 +124,21 @@ class UserController extends Controller
                 $data['council_reg_no'] =  $request['council_reg_no'];
 
                 $data['status']     =  0;
+
+                if ($request->hasFile('picture')) {
+                
+                    $Imagefile = $request->file('picture');
+                    $file_name = $Imagefile->getClientOriginalName();
+                    $file_extn = $Imagefile->getClientMimeType();
+                    $file_size = $Imagefile->getClientSize();
+                    
+                    $file_tmp_path = $Imagefile->getPathname();
+                    $file_name     = time() . $file_name;
+                    $data['picture'] = $file_name;
+                    //Upload new profile picture
+                    $Imagefile->move(public_path('images'), $file_name);
+                }
+
                 $user = new User;
 
                 $this->apiResponse['statusCode'] = 201;
@@ -149,8 +236,5 @@ class UserController extends Controller
         }
         return $this->apiResponse;
     }
-
-
-
 
 }
