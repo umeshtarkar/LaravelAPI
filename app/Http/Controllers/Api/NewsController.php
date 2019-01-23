@@ -26,8 +26,12 @@ class NewsController extends Controller
             if(!$this->is_pagination_params){
                 throw new Exception("Pagination parameters are missing.", 1);
             }
-
-            $news = News::orderBy('id','DESC')->skip($this->record_offset)->take($this->records_per_page)->get();
+            if($request->has('mostPopular') && $request->get('mostPopular')){
+                $news = News::orderBy('views','DESC')->skip($this->record_offset)->take($this->records_per_page)->get();
+            }else{
+                $news = News::orderBy('id','DESC')->skip($this->record_offset)->take($this->records_per_page)->get();
+            }
+            
             
             if(!$news->isEmpty()){
                 
@@ -87,7 +91,6 @@ class NewsController extends Controller
             
             $validator = Validator::make($request, [
                 'title'              => 'required|regex:/^([^0-9]*)$/|max:255',
-                'youtube_video_url'  => 'unique:news,youtube_video_url',
                 'news_category_id'   => 'required',
                 'user_id'            =>  'required',
             ]);
@@ -123,7 +126,6 @@ class NewsController extends Controller
                 if($news){
                     $validator = Validator::make($request, [
                         'title'              => 'required|regex:/^([^0-9]*)$/|max:255',
-                        'youtube_video_url'  => 'unique:news,youtube_video_url,'.$id,
                         'news_category_id'   => 'required',
                         'user_id'            =>  'required',
                     ]);
@@ -132,6 +134,15 @@ class NewsController extends Controller
                         throw new Exception($this->getErrorMessage($validator));
                     } 
                     
+                    if(empty($request['picture_large']) ){
+                        
+                        unset($request['picture_large']);
+                    }
+
+                    if(empty($request['picture_small'])){
+                        unset($request['picture_small']);
+                    }
+                   
                     $news->fill($request);
                     
                     if($news->push()){

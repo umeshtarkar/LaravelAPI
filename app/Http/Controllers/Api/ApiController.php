@@ -27,6 +27,7 @@ class ApiController extends Controller
 
    public function signin(Request $request){
     try{
+        $parameters = $request->all();
         
         $validator = Validator::make( $parameters, [
             'email' => 'required|email',

@@ -18,7 +18,8 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::prefix('v1/session')->namespace('Api')->group(function(){
-    
+   
+    Route::post('user/login','UserController@signin');
     Route::get('user/list','UserController@getUsers');
     Route::get('user/count','UserController@getUsersCount');
     Route::get('user/{id}','UserController@getUserDetail');

@@ -8,6 +8,8 @@ use Validator;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -17,6 +19,46 @@ class UserController extends Controller
         $this->apiResponse['data'] = new \stdClass();
     }
 
+    public function guard()
+    {
+     return Auth::guard('api');
+   }
+
+   public function signin(Request $request){
+    
+    try{
+        $parameters = $request->all();
+
+        $validator = Validator::make( $parameters, [
+            'email' => 'required|email',
+            'password' => 'required|min:6|max:25',
+        ] );
+        
+        if ( $validator->fails() ) {
+            throw new Exception($this->getErrorMessage($validator));
+        }
+        dd($this->guard());
+        if($this->guard()->attempt($parameters)){
+            echo 2;
+            $token = $this->_generateUserToken();
+            $admin = User::where('email',$request->email)->first();
+            $admin->auth_token = $token;
+
+            if($admin->save()){
+                $this->apiResponse['statusCode'] = 200;
+                $this->apiResponse['status']     = 'success';
+                $this->apiResponse['message']    = 'Logged in sucessfully!';
+                $this->apiResponse['data']       = $admin;
+            }
+        }else{
+            $this->apiResponse['statusCode']     = 401;
+            $this->apiResponse['message']        = 'Invalid Credentials';
+        }
+        
+        }catch(Exception $e){
+            $this->apiResponse['message'] = $e->getMessage();
+        }
+    }
 
     public function getUsers(Request $request){
         
