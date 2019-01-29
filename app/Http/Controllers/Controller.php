@@ -55,4 +55,10 @@ class Controller extends BaseController
                 return $e->getMessage();
         }
     }
+
+    // Generates An Unique Id..
+    protected function _generateUserToken() 
+    {
+    	return md5( uniqid() );
+    }
 }

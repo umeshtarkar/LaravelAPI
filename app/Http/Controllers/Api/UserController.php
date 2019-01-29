@@ -10,19 +10,22 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Contracts\Auth\Guard;
 
 class UserController extends Controller
 {
-    public function __construct()
+    protected $auth; 
+
+    public function __construct(Guard $auth)
     {
-        $this->middleware('guest');
+        $this->auth = $auth;
         $this->apiResponse['data'] = new \stdClass();
     }
 
-    public function guard()
-    {
-     return Auth::guard('api');
-   }
+//     public function guard()
+//     {
+//      return Auth::guard('api');
+//    }
 
    public function signin(Request $request){
     
@@ -37,9 +40,9 @@ class UserController extends Controller
         if ( $validator->fails() ) {
             throw new Exception($this->getErrorMessage($validator));
         }
-        dd($this->guard());
-        if($this->guard()->attempt($parameters)){
-            echo 2;
+        
+        if($this->auth->attempt($parameters)){
+            
             $token = $this->_generateUserToken();
             $admin = User::where('email',$request->email)->first();
             $admin->auth_token = $token;
@@ -58,6 +61,8 @@ class UserController extends Controller
         }catch(Exception $e){
             $this->apiResponse['message'] = $e->getMessage();
         }
+        return $this->apiResponse;
+
     }
 
     public function getUsers(Request $request){

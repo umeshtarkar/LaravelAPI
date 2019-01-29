@@ -59,24 +59,6 @@ class ApiController extends Controller
         $this->apiResponse['message'] = $e->getMessage();
     }
 
-
-
-        if($this->guard()->attempt($request->all())){
-
-            $token = $this->_generateUserToken();
-            $admin = Admin::where('email',$request->email)->first();
-            $admin->auth_token = $token;
-
-            if($admin->save()){
-                $this->apiResponse['statusCode'] = 200;
-                $this->apiResponse['status']     = 'success';
-                $this->apiResponse['message']    = 'Logged in sucessfully!';
-                $this->apiResponse['data']       = $admin;
-            }
-        }else{
-            $this->apiResponse['statusCode']     = 401;
-            $this->apiResponse['message']        = 'Invalid Credentials';
-        }
     return $this->apiResponse;
    }
 
@@ -196,10 +178,5 @@ class ApiController extends Controller
         return $this->apiResponse;
     }
 
-    // Generates An Unique Id..
-    private function _generateUserToken() 
-    {
-    	return md5( uniqid() );
-    }
 
 }
