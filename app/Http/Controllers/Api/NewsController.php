@@ -27,12 +27,16 @@ class NewsController extends Controller
                 throw new Exception("Pagination parameters are missing.", 1);
             }
             if($request->has('mostPopular') && $request->get('mostPopular')){
-                $news = News::orderBy('views','DESC')->skip($this->record_offset)->take($this->records_per_page)->get();
+                $news = News::orderBy('views','DESC')->skip($this->record_offset)->take($this->records_per_page);
             }else{
-                $news = News::orderBy('id','DESC')->skip($this->record_offset)->take($this->records_per_page)->get();
+                $news = News::orderBy('id','DESC')->skip($this->record_offset)->take($this->records_per_page);
             }
             
-            
+            if($request->has('status') && !empty($request->status)){
+                $news->where('status',1);
+            }
+
+            $news = $news->get();
             if(!$news->isEmpty()){
                 
                 $this->apiResponse['statusCode'] = 200;
@@ -73,7 +77,9 @@ class NewsController extends Controller
                 throw new Exception("Invalid Request");
             }
             $news = News::find($id);
-            
+            $news->views = $news->views+1;
+            $news->save();
+
             if($news){
                 $this->apiResponse['statusCode'] = 200;
                 $this->apiResponse['status']     = 'success';

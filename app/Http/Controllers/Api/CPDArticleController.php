@@ -54,6 +54,7 @@ class CPDArticleController extends Controller
             if($articlesCount){
                 $this->apiResponse['statusCode'] = 200;
                 $this->apiResponse['status']     = 'success';
+                $this->apiResponse['message']    = "Found $articlesCount Results";
                 $this->apiResponse['data']       = $articlesCount;
             }
         }catch(Exception $e){
@@ -69,6 +70,8 @@ class CPDArticleController extends Controller
                 throw new Exception("Invalid Request");
             }
             $article = CPDArticle::find($id);
+            $article->views = $article->views+1;
+            $article->save();
             
             if($article){
                 $this->apiResponse['statusCode'] = 200;

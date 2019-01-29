@@ -26,8 +26,17 @@ class VacancyController extends Controller
                 throw new Exception("Pagination parameters are missing.", 1);
             }
             
-            $vacancy = Vacancy::orderBy('id','DESC')->skip($this->record_offset)->take($this->records_per_page);
+            if($request->has('mostPopular') && !empty($request->mostPopular)){
+                $vacancy = Vacancy::orderBy('views','DESC')->skip($this->record_offset)->take($this->records_per_page);
+            }else{
+                $vacancy = Vacancy::orderBy('id','DESC')->skip($this->record_offset)->take($this->records_per_page);
             
+            }
+            
+            if($request->has('status') && !empty($request->status)){
+                $vacancy->where('status',1);
+            }
+
             if($request->has('keyword') && !empty($request->keyword)){
                 $vacancy->orWhere('name','like',''. $request->keyword.'%')
                       ->orWhere('detail', 'like',''. $request->keyword.'%')
@@ -67,6 +76,7 @@ class VacancyController extends Controller
             if($vacancyCount){
                 $this->apiResponse['statusCode'] = 200;
                 $this->apiResponse['status']     = 'success';
+                $this->apiResponse['message']    = "Found $vacancyCount Results";
                 $this->apiResponse['data']       = $vacancyCount;
             }
         }catch(Exception $e){
@@ -81,8 +91,11 @@ class VacancyController extends Controller
             if(!$id){
                 throw new Exception("Invalid Request");
             }
+
             $vacancy = Vacancy::find($id);
-            
+            $vacancy->views = $vacancy->views+1;
+            $vacancy->save();
+
             if($vacancy){
                 $this->apiResponse['statusCode'] = 200;
                 $this->apiResponse['status']     = 'success';

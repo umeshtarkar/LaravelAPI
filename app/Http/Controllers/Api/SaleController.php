@@ -26,8 +26,19 @@ class SaleController extends Controller
                 throw new Exception("Pagination parameters are missing.", 1);
             }
 
-            $sale = Sale::orderBy('id','DESC')->skip($this->record_offset)->take($this->records_per_page);
+            if($request->has('mostPopular') && !empty($request->mostPopular)){
+                $sale = Sale::orderBy('views','DESC')->skip($this->record_offset)->take($this->records_per_page);
+            }else{
+                $sale = Sale::orderBy('id','DESC')->skip($this->record_offset)->take($this->records_per_page);
+            }
             
+            
+            if($request->has('status') && !empty($request->status)){
+                $sale->where('status',1);
+            }
+            
+            
+
             if($request->has('keyword') && !empty($request->keyword)){
                 $sale->orWhere('name','like',''. $request->keyword.'%')
                       ->orWhere('detail', 'like',''. $request->keyword.'%')
@@ -63,6 +74,7 @@ class SaleController extends Controller
             if($saleCount){
                 $this->apiResponse['statusCode'] = 200;
                 $this->apiResponse['status']     = 'success';
+                $this->apiResponse['message']    = "Found $saleCount Results";
                 $this->apiResponse['data']       = $saleCount;
             }
         }catch(Exception $e){
@@ -78,7 +90,9 @@ class SaleController extends Controller
                 throw new Exception("Invalid Request");
             }
             $sale = Sale::find($id);
-            
+            $sale->views = $sale->views+1;
+            $sale->save();
+
             if($sale){
                 $this->apiResponse['statusCode'] = 200;
                 $this->apiResponse['status']     = 'success';
