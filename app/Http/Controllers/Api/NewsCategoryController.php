@@ -45,14 +45,20 @@ class NewsCategoryController extends Controller
         return $this->apiResponse;
     }
 
-    public function getCategoryCount(){
+    public function getCategoryCount(Request $request){
         
         try{
-            $categoryCount = NewsCategory::where('status',1)->count();
+            if($request->has('status') && !empty($request->status)){
+                $categoryCount = NewsCategory::where('status',1)->count();
+            }else{
+                $categoryCount = NewsCategory::count();
+            }
+            
             
             if($categoryCount){
                 $this->apiResponse['statusCode'] = 200;
                 $this->apiResponse['status']     = 'success';
+                $this->apiResponse['message']    = "Found $categoryCount Results";
                 $this->apiResponse['data']       = $categoryCount;
             }
         }catch(Exception $e){

@@ -66,10 +66,14 @@ class SaleController extends Controller
     }
 
 
-    public function getSaleCount(){
+    public function getSaleCount(Request $request){
         
         try{
-            $saleCount = Sale::where('status',1)->count();
+            if($request->has('status') && !empty($request->status)){
+                $saleCount = Sale::where('status',1)->count();
+            }else{
+                $saleCount = Sale::count();
+            }
             
             if($saleCount){
                 $this->apiResponse['statusCode'] = 200;

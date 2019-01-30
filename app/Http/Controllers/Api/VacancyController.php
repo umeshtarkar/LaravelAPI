@@ -68,10 +68,15 @@ class VacancyController extends Controller
     }
 
 
-    public function getVacancyCount(){
+    public function getVacancyCount(Request $request){
         
         try{
-            $vacancyCount = Vacancy::where('status',1)->count();
+            if($request->has('status') && !empty($request->status)){
+                $vacancyCount = Vacancy::where('status',1)->count();
+            }else{
+                $vacancyCount = Vacancy::count();
+            }
+            
             
             if($vacancyCount){
                 $this->apiResponse['statusCode'] = 200;

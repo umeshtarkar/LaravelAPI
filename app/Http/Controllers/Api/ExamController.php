@@ -53,6 +53,28 @@ class ExamController extends Controller
         return $this->apiResponse;
     }
 
+    public function getExamCount(Request $request){
+        
+        try{
+            if($request->has('status') && !empty($request->status)){
+                $examCount = Exam::where('status',1)->count();
+            }else{
+                $examCount = Exam::count();
+            }
+            
+            
+            if($examCount){
+                $this->apiResponse['statusCode'] = 200;
+                $this->apiResponse['status']     = 'success';
+                $this->apiResponse['message']    = "Found $examCount Results";
+                $this->apiResponse['data']       = $examCount;
+            }
+        }catch(Exception $e){
+            $this->apiResponse = $e->getMessage();
+        }
+        return $this->apiResponse;
+    }
+
     public function getExamDetail($id){
         try{
             

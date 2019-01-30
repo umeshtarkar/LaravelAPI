@@ -32,7 +32,7 @@ Route::prefix('v1/session')->namespace('Api')->group(function(){
     Route::post('user-exam/create','UserExamController@createUserExam');
     Route::post('user-exam/update','UserExamController@updateUserExam');
 
-    Route::get('news','NewsController@getNews');
+    Route::get('news/{id?}','NewsController@getNews');
     Route::get('news/count','NewsController@getNewsCount');
     Route::get('news/{id}','NewsController@getNewsDetail');
     Route::post('news/create','NewsController@createNews');
@@ -61,6 +61,7 @@ Route::prefix('v1/session')->namespace('Api')->group(function(){
     Route::post('article/status','CPDArticleController@toggleCPDArticle');
     
     Route::get('exam/list','ExamController@getExams');
+    Route::get('exam/count','ExamController@getExamCount');
     Route::get('exam/{id}','ExamController@getExamDetail');
     Route::post('exam/create','ExamController@createExam');
     Route::post('exam/update','ExamController@updateExam');

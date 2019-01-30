@@ -54,10 +54,14 @@ class CPDArticleController extends Controller
         return $this->apiResponse;
     }
 
-    public function getCPDArticlesCount(){
+    public function getCPDArticlesCount(Request $request){
         
         try{
-            $articlesCount = CPDArticle::count();
+            if($request->has('status') && !empty($request->status)){
+                $articlesCount = CPDArticle::where('status',1)->count();
+            }else{
+                $articlesCount = CPDArticle::count();
+            }
             
             if($articlesCount){
                 $this->apiResponse['statusCode'] = 200;

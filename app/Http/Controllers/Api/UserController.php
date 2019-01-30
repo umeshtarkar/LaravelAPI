@@ -102,14 +102,19 @@ class UserController extends Controller
         return $this->apiResponse;
     }
 
-    public function getUsersCount(){
+    public function getUsersCount(Request $request){
         
         try{
-            $userCount = User::where('status',1)->count();
+            if($request->has('status') && !empty($request->status)){
+                $userCount = User::where('status',1)->count();
+            }else{
+                $userCount = User::count();
+            }
             
             if($userCount){
                 $this->apiResponse['statusCode'] = 200;
                 $this->apiResponse['status']     = 'success';
+                $this->apiResponse['message']    = "Found $userCount Results";
                 $this->apiResponse['data']       = $userCount;
             }
         }catch(Exception $e){

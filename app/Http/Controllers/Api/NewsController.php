@@ -18,20 +18,33 @@ class NewsController extends Controller
         $this->apiResponse['data'] = new \stdClass();
     }
     
-    public function getNews(Request $request){
+    public function getNews(Request $request,$id=null){
         
         try{
+            
             $this->paginationParametersCheck($request);
             
             if(!$this->is_pagination_params){
                 throw new Exception("Pagination parameters are missing.", 1);
             }
-            if($request->has('mostPopular') && $request->get('mostPopular')){
-                $news = News::orderBy('views','DESC')->skip($this->record_offset)->take($this->records_per_page);
-            }else{
+
+            if(isset($id) && !empty($id) ) 
+            {
                 $news = News::orderBy('id','DESC')->skip($this->record_offset)->take($this->records_per_page);
+                
+               if($request->has('next') && !empty($request->next)){
+                   $news->where('id','<',$id);
+               }else if($request->has('prev') && !empty($request->prev)){
+                    $news->where('id','>',$id);
+               } 
+            }else{
+                if($request->has('mostPopular') && $request->get('mostPopular')){
+                    $news = News::orderBy('views','DESC')->skip($this->record_offset)->take($this->records_per_page);
+                }else{
+                    $news = News::orderBy('id','DESC')->skip($this->record_offset)->take($this->records_per_page);
+                }
             }
-            
+
             if($request->has('status') && !empty($request->status)){
                 $news->where('status',1);
             }
@@ -54,14 +67,19 @@ class NewsController extends Controller
         return $this->apiResponse;
     }
 
-    public function getNewsCount(){
+    public function getNewsCount(Request $request){
         
         try{
-            $newsCount = News::where('status',1)->count();
+            if($request->has('status') && !empty($request->status)){
+                $newsCount = News::where('status',1)->count();
+            }else{
+                $newsCount = News::count();
+            }
             
             if($newsCount){
                 $this->apiResponse['statusCode'] = 200;
                 $this->apiResponse['status']     = 'success';
+                $this->apiResponse['message']    = "Found $newsCount Results";
                 $this->apiResponse['data']       = $newsCount;
             }
         }catch(Exception $e){
