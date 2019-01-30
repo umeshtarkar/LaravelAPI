@@ -19,9 +19,17 @@ class CPDArticleController extends Controller
             if(!$this->is_pagination_params){
                 throw new Exception("Pagination parameters are missing.", 1);
             }
-
-            $articles = CPDArticle::orderBy('id','DESC')->skip($this->record_offset)->take($this->records_per_page);
+            if($request->has('mostPopular') && !empty($request->mostPopular)){
+                $articles = CPDArticle::orderBy('views','DESC')->skip($this->record_offset)->take($this->records_per_page);
             
+            }else{
+                $articles = CPDArticle::orderBy('id','DESC')->skip($this->record_offset)->take($this->records_per_page);
+            }
+            
+            if($request->has('status') && !empty($request->status)){
+                $articles->where('status',1);
+            }
+
             if($request->has('keyword')){
                 $articles->orWhere('title','like',''. $request->keyword.'%')
                       ->orWhere('subtitle', 'like',''. $request->keyword.'%');
